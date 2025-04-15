@@ -1,4 +1,5 @@
 local M = {}
+local utils = require("utils")
 
 local config = {
   todo_dir = "~/.todo",
