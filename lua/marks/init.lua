@@ -7,10 +7,25 @@ function M.open()
 
   for _, mark in ipairs(marks) do
     local name = mark.mark:sub(2, 2)
-    if name:match("%u") then -- apenas letras maiúsculas
-      local pos = mark.pos
-      local bufname = vim.api.nvim_buf_get_name(mark.bufnr or 0)
-      table.insert(global_marks, string.format("%s -> %s:%d:%d", name, bufname, pos[2], pos[3]))
+    if name:match("[%u%d]") then
+      local filepath = mark.file or ""
+      local display = ""
+
+      -- Check if is a project (look for a .git directory)
+      local git_dir = vim.fn.finddir(".git", filepath .. ";")
+      if git_dir ~= "" then
+        local project_dir = vim.fn.fnamemodify(git_dir, ":h")
+        local project_name = vim.fn.fnamemodify(project_dir, ":t")
+        if project_name == "." then
+          project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+        end
+        local filename = vim.fn.fnamemodify(filepath, ":t")
+        display = string.format("%s -> %s:%s", name, project_name, filename)
+      else
+        display = string.format("%s -> %s", name, filepath)
+      end
+
+      table.insert(global_marks, display)
     end
   end
 
